@@ -38,7 +38,7 @@ pipeline {
                     retry(5) {
                         sleep 10
                         // Проверяем доступность WordPress
-                        sh 'curl -I http://localhost:5002 | grep "200 OK"'
+                        sh 'curl -I http://188.245.175.242:5002 | grep "200 OK"'
                     }
                 }
             }
