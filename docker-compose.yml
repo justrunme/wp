@@ -1,21 +1,27 @@
-version: '3.7'
+version: '3.8'
+
 services:
   wp_site:
-    image: wordpress_custom
-    ports:
-      - "5002:80"  # Порт, который связывает localhost и контейнер
+    image: wordpress:latest
     environment:
       WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: exampleuser
-      WORDPRESS_DB_PASSWORD: examplepass
-      WORDPRESS_DB_NAME: exampledb
-    depends_on:
-      - db
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: wp_password
+      WORDPRESS_DB_NAME: wp_database
+    ports:
+      - "5002:80"  # Убедитесь, что порт не конфликтует с другим процессом
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
 
   db:
     image: mysql:5.7
     environment:
-      MYSQL_DATABASE: exampledb
-      MYSQL_USER: exampleuser
-      MYSQL_PASSWORD: examplepass
-      MYSQL_ROOT_PASSWORD: somewordpress
+      MYSQL_DATABASE: wp_database
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: wp_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
