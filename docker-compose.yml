@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  wordpress:
+    image: wordpress:latest
+    container_name: wp_site
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: user
+      WORDPRESS_DB_PASSWORD: password
+      WORDPRESS_DB_NAME: wordpress
+    ports:
+      - "5002:80"  # Порт для внешнего доступа к WordPress
+    volumes:
+      - ./wp-content:/var/www/html/wp-content  # Для сохранения данных
+
+  db:
+    image: mysql:5.7
+    container_name: wp_db
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - ./db_data:/var/lib/mysql
