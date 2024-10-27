@@ -14,9 +14,13 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    sh 'docker-compose up -d'  // Запускаем контейнеры перед тестом
-                    sh 'sleep 10'              // Ожидаем запуска контейнеров
-                    sh 'curl -I http://localhost:5002 | grep "200 OK"'  // Тестируем доступность
+                    sh 'docker-compose up -d'  // Запуск контейнеров
+                    
+                    // Проверяем доступность контейнера на порту 5002
+                    retry(5) {
+                        sleep 10
+                        sh 'curl -I http://localhost:5002 | grep "200 OK"'
+                    }
                 }
             }
         }
@@ -26,7 +30,6 @@ pipeline {
             }
             steps {
                 echo 'Deployment stage...'
-                // Добавьте команды деплоя, если нужно
             }
         }
     }
