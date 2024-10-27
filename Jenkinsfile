@@ -1,55 +1,38 @@
 pipeline {
     agent any
-
-    environment {
-        DOCKER_IMAGE = "wordpress_custom"
-    }
-
     stages {
         stage('Build') {
             steps {
-                script {
-                    // Сборка пользовательского образа WordPress (если требуется)
-                    DOCKER_IMAGE = docker.build("${DOCKER_IMAGE}", ".")
-                }
+                sh 'docker build -t wordpress_custom .'
             }
         }
-
         stage('Lint') {
             steps {
-                script {
-                    // Запуск PHP-кода через линтер, чтобы поймать ошибки синтаксиса и другие проблемы
-                    sh 'docker run --rm -v $(pwd)/wp-content:/var/www/html/wp-content wordpress:cli php -l /var/www/html/wp-content'
-                }
+                sh 'docker run --rm -v $PWD/wp-content:/var/www/html/wp-content wordpress:cli php -l /var/www/html/wp-content'
             }
         }
-
         stage('Test') {
             steps {
                 script {
-                    // Простое тестирование доступности страницы
-                    sh 'curl -I http://localhost:5002 | grep "200 OK"'
+                    sh 'docker-compose up -d'  // Запускаем контейнеры перед тестом
+                    sh 'sleep 10'              // Ожидаем запуска контейнеров
+                    sh 'curl -I http://localhost:5002 | grep "200 OK"'  // Тестируем доступность
                 }
             }
         }
-
         stage('Deploy') {
+            when {
+                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+            }
             steps {
-                script {
-                    // Развертывание контейнера WordPress с использованием docker-compose
-                    sh 'docker-compose down' // Останавливаем контейнеры перед обновлением
-                    sh 'docker-compose up -d' // Запускаем контейнеры в режиме detached
-                }
+                echo 'Deployment stage...'
+                // Добавьте команды деплоя, если нужно
             }
         }
     }
-
     post {
         always {
-            script {
-                // Завершение и удаление контейнеров после запуска
-                sh 'docker-compose down'
-            }
+            sh 'docker-compose down'
         }
     }
 }
